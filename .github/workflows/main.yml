@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  python:
+    name: Python model tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r pultec_proto/requirements.txt
+      - run: python -m pytest pultec_proto/python/tests -q
+
+  dsp-core:
+    name: C++ DSP core vs Python reference
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S pultec_proto -B build -DPULTEC_BUILD_PLUGIN=OFF -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build --parallel
+      - run: ctest --test-dir build --output-on-failure
+
+  plugin-windows:
+    name: Plugin (Windows)
+    needs: [python, dsp-core]
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S pultec_proto -B build -DPULTEC_BUILD_TESTS=OFF
+      - name: Build
+        run: cmake --build build --config Release --parallel
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PultecProto-Windows
+          path: |
+            build/PultecProto_artefacts/Release/VST3
+            build/PultecProto_artefacts/Release/Standalone
+          if-no-files-found: error

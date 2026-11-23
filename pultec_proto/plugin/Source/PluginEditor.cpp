@@ -341,7 +341,8 @@ void PultecEditor::renderBackground()
     // nameplate
     label (g, "PULTEC PROTO", 327, 127, 34, true);
     label (g, "PROGRAM EQUALIZER", 327, 165, 22, true);
-    label (g, "EQP-1A STYLE  -  v0.1", 327, 199, 18, false);
+    label (g, "EQP-1A STYLE  -  v0.2", 327, 199, 18, false);
+    label (g, String ("build ") + __DATE__ + " " + __TIME__, 327, 228, 14, false);
 
     // group headers
     label (g, "LOW FREQUENCY", 752, 23, 26, true);

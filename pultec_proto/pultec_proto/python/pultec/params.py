@@ -20,10 +20,10 @@ class Params:
     saturation: float = 1.0     # 0 = off, 1 = calibrated to hardware spec
     oversampling: int = 4
     # Behavioural LF model: provisional fit (docs/LF_MODEL.md)
-    lf_boost_q: float = 0.6
-    lf_boost_taper: float = 0.5
+    lf_boost_q: float = 0.6816
+    lf_boost_taper: float = 0.585
     lf_cut_taper: float = 0.7
-    lf_cut_split: float = 0.5365     # share of cut depth in the lower shelf
-    lf_cut_k1: float = 0.4675        # cut corner multipliers (x selector)
-    lf_cut_k2: float = 32.058
+    lf_cut_split: float = 0.5772     # share of cut depth in the lower shelf
+    lf_cut_k1: float = 0.8331        # cut corner multipliers (x selector)
+    lf_cut_k2: float = 42.12
     lf_cut_interaction: float = 0.6   # boost shrinks the effective cut depth

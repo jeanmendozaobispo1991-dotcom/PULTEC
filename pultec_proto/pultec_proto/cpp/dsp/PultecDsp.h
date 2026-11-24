@@ -10,14 +10,14 @@ namespace pultec {
 constexpr double kPi = 3.14159265358979323846;
 
 // ---- spec constants (source tags in python/pultec/constants.py) -------------
-constexpr double kLfBoostMaxDb = 16.0;
+constexpr double kLfBoostMaxDb = 18.0;
 constexpr double kLfCutMaxDb = 20.0;
 constexpr double kHfBoostMaxDb = 20.0;
-constexpr double kHfBwSpreadDb = 7.0;
+constexpr double kHfBwSpreadDb = 5.0;
 constexpr double kHfCutMaxDb = 21.0;
 constexpr double kHfCutAtSelFrac = 12.0 / 21.0;
 constexpr double kQSharp = 1.0, kQBroad = 0.3;
-constexpr double kLfBoostCornerDropDb = 3.0;   // gain at the selected freq = plateau - drop
+constexpr double kLfBoostCornerDropDb = 1.5;   // gain at the selected freq = plateau - drop
 constexpr double kTubeBias = 0.3;
 constexpr double kXfmrCornerHz = 120.0;
 constexpr double kXfmrThreshold = 1.0;
@@ -29,8 +29,8 @@ struct Params {
     double hfFreq = 10000, hfBoost = 0, hfBw = 5;
     double hfCutFreq = 10000, hfCut = 0;
     // provisional LF behavioural fit (docs/LF_MODEL.md)
-    double lfBoostQ = 0.6, lfBoostTaper = 0.5, lfCutTaper = 0.7;
-    double lfCutSplit = 0.5365, lfCutK1 = 0.4675, lfCutK2 = 32.058;
+    double lfBoostQ = 0.6816, lfBoostTaper = 0.585, lfCutTaper = 0.7;
+    double lfCutSplit = 0.5772, lfCutK1 = 0.8331, lfCutK2 = 42.12;
     double lfCutInteraction = 0.6;   // boost shrinks the effective cut depth
 };
 

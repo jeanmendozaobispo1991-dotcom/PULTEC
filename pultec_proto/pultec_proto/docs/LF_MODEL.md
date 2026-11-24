@@ -1,4 +1,4 @@
-# Modelo de graves (provisional, v0.2)
+# Modelo de graves (provisional, v0.3: realce máx. 18 dB)
 
 Es la parte menos fundamentada. Las fuentes dan restricciones, no un esquema:
 
@@ -20,10 +20,10 @@ Es la parte menos fundamentada. Las fuentes dan restricciones, no un esquema:
 ## Resultados del modelo
 | Ajuste | Resultado |
 |---|---|
-| Realce 10 solo, 60 Hz | +13 dB a 60 Hz, +10,8 a 80 Hz, +8,7 a 100 Hz |
+| Realce 10 solo, 60 Hz | +16,5 dB a 60 Hz, +12 dB a 100 Hz |
 | Atenuación 10 sola | -14 a -19 dB en graves (fuentes: 17,5-20) |
 | 2,5 / 2,5 | +3,0 dB abajo, dip -2,25 dB a ~7x el selector |
-| 10 / 10 | ~+8,5 dB en el selector, dip ~-3 dB por encima |
+| 10 / 10 | ~+11 dB en el selector, dip ~-3 dB por encima |
 
 ## Limitaciones
 - No es la red LC real: realce y atenuación son etapas con una interacción simplificada.

@@ -67,14 +67,14 @@ int main(int argc, char** argv) {
     {   for (double fs : {20.0, 30.0, 60.0, 100.0}) {     // boost near max at the selected frequency
             Params p; p.lfFreq = fs; p.lfBoost = 10;
             double at = analogResponseDb(design(p), fs);
-            CHECK(at > 11.5 && at < 14.0, "LF boost @sel %.2f dB (fs %.0f)", at, fs);
+            CHECK(at > 15.0 && at < 18.0, "LF boost @sel %.2f dB (fs %.0f)", at, fs);
             p.lfCut = 10; SectionSet s2 = design(p);
             CHECK(analogResponseDb(s2, 10) > 6.0, "LF 10/10 bass %.2f", analogResponseDb(s2, 10));
         } }
     {   Params p; p.hfFreq = 5000; p.hfBoost = 10; p.hfBw = 0;
         double sharp = analogResponseDb(design(p), 5000); p.hfBw = 10;
         double broad = analogResponseDb(design(p), 5000);
-        CHECK(std::fabs(sharp - 20) < 0.3 && std::fabs(sharp - broad - 7) < 0.3, "HF %.2f/%.2f", sharp, broad); }
+        CHECK(std::fabs(sharp - 20) < 0.3 && std::fabs(sharp - broad - 5) < 0.3, "HF %.2f/%.2f", sharp, broad); }
     {   Params p; p.hfCut = 10; p.hfCutFreq = 10000;
         CHECK(std::fabs(analogResponseDb(design(p), 10000) + 12) < 0.3, "HF cut @sel"); }
     {   const int n = 1 << 15; const double fs = 192000; std::vector<double> y(n);

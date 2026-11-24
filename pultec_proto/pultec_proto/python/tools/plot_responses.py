@@ -18,7 +18,7 @@ for fs in (60,):
 ax[0].set_title("Low: boost 2.5 + atten 2.5 (SOS: +3 / -2 dB)\nand 60 Hz boost 10 alone (dashed)")
 for bw in (0, 5, 10):
     ax[1].semilogx(f, eq_response_db(Params(hf_freq=8000, hf_boost=10, hf_bw=bw), f), label=f"bandwidth {bw}")
-ax[1].set_title("HF boost @ 8 kHz, max\n(narrow 20 dB, broad 13 dB)")
+ax[1].set_title("HF boost @ 8 kHz, max\n(narrow 20 dB, broad 15 dB)")
 for fc in (5000, 10000, 20000):
     ax[2].semilogx(f, eq_response_db(Params(hf_cut_freq=fc, hf_cut=10), f), label=f"{fc // 1000} kHz")
 ax[2].set_title("HF atten, max\n(Manley target: -12 dB at selected f)")

@@ -232,8 +232,9 @@ PultecEditor::PultecEditor (PultecProcessor& p) : AudioProcessorEditor (&p), pro
 
     setResizable (true, true);
     getConstrainer()->setFixedAspectRatio ((double) (ui::kW / ui::kH));
-    getConstrainer()->setSizeLimits (848, 202, 2546, 606);
-    setSize (1274, 303);
+    getConstrainer()->setSizeLimits (560, 133, 2546, 606);
+    const int w = jlimit (560, 2546, (int) proc.apvts.state.getProperty ("editorWidth", 760));   // remembered size
+    setSize (w, roundToInt ((float) w * ui::kH / ui::kW));
     startTimerHz (30);
 }
 
@@ -281,6 +282,7 @@ void PultecEditor::resized()
     place (eqIn, 538, 393, 45, 60);     place (autoGain, 1851, 377, 45, 60);
     place (lamp, 1947, 351, 60, 60);
     renderBackground();
+    if (getWidth() > 0) proc.apvts.state.setProperty ("editorWidth", getWidth(), nullptr);
 }
 
 void PultecEditor::renderBackground()
@@ -341,8 +343,9 @@ void PultecEditor::renderBackground()
     // nameplate
     label (g, "PULTEC PROTO", 327, 127, 34, true);
     label (g, "PROGRAM EQUALIZER", 327, 165, 22, true);
-    label (g, "EQP-1A STYLE  -  v0.2", 327, 199, 18, false);
+    label (g, "EQP-1A STYLE  -  v0.3", 327, 199, 18, false);
     label (g, String ("build ") + __DATE__ + " " + __TIME__, 327, 228, 14, false);
+    label (g, "right-click on the panel: window size", 327, 252, 13, false);
 
     // group headers
     label (g, "LOW FREQUENCY", 752, 23, 26, true);
@@ -375,6 +378,23 @@ void PultecEditor::renderBackground()
     label (g, "IN", 584, 365, 20, false);  label (g, "OUT", 592, 422, 20, false);  label (g, "EQ", 537, 472, 24, true);
     label (g, "ON", 1894, 340, 20, false); label (g, "OFF", 1897, 401, 20, false); label (g, "AUTO GAIN", 1853, 450, 24, true);
     label (g, "DRIVE", 1946, 422, 24, true);
+}
+
+void PultecEditor::mouseUp (const MouseEvent& e)
+{
+    if (! e.mods.isPopupMenu()) return;
+    static constexpr std::array<int, 4> sizes { 600, 760, 880, 1100 };
+    PopupMenu m;
+    m.addSectionHeader ("Window size");
+    const char* names[] = { "Compact (600 px)", "Small (760 px)", "Normal (880 px)", "Large (1100 px)" };
+    for (int i = 0; i < 4; ++i)
+        m.addItem (i + 1, names[i], true, std::abs (getWidth() - sizes[(size_t) i]) < 25);
+    m.showMenuAsync (PopupMenu::Options(), [safe = Component::SafePointer<PultecEditor> (this)] (int r)
+    {
+        if (safe == nullptr || r < 1 || r > 4) return;
+        const int w = sizes[(size_t) (r - 1)];
+        safe->setSize (w, roundToInt ((float) w * ui::kH / ui::kW));
+    });
 }
 
 void PultecEditor::paint (Graphics& g)

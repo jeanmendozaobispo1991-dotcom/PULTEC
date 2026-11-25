@@ -32,6 +32,7 @@ public:
     ~PultecEditor() override;
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseUp (const juce::MouseEvent&) override;   // right-click: window size menu
 
 private:
     void timerCallback() override;

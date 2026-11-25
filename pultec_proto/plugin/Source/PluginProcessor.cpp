@@ -39,7 +39,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout PultecProcessor::createLayou
     p.push_back (std::make_unique<AudioParameterBool> (ParameterID {"eq_in", 1}, "EQ In", true));
     gain ("in_gain", "Input Gain (dB)");
     p.push_back (std::make_unique<AudioParameterFloat> (ParameterID {"sat", 1}, "Saturation",
-                 NormalisableRange<float> (0.f, 6.f, 0.01f, 0.5f), 1.f));
+                 NormalisableRange<float> (0.f, 6.f, 0.01f, 0.5f), 2.f));
     gain ("out_gain", "Output Gain (dB)");
     p.push_back (std::make_unique<AudioParameterBool> (ParameterID {"auto_gain", 1}, "Auto Gain", false));
     choice ("os", "Oversampling", {"2x", "4x", "8x"}, 1);

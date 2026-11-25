@@ -16,7 +16,7 @@ _z0 = np.array([np.sqrt(C.HF_BOOST_LC[f][0] / C.HF_BOOST_LC[f][1]) for f in _tap
 _Z_FIT = np.polyfit(np.log(_taps), _z0, 1)
 _Z_MEAN = float(_z0.mean())
 
-Q_SHARP, Q_BROAD = 2.5, 0.6   # [assumed] at mean tap impedance
+Q_SHARP, Q_BROAD = 1.0, 0.3   # [assumed] at mean tap impedance (wide enough to be audible)
 
 
 def taper(pos, exponent=1.0):
@@ -30,6 +30,28 @@ def low_shelf2(f0, gain_db, q):
     b = A * np.array([1 / w0**2, np.sqrt(A) / (q * w0), A])
     a = np.array([A / w0**2, np.sqrt(A) / (q * w0), 1.0])
     return b, a
+
+
+def lowshelf_db_at(f, f0, gain_db, q):
+    """Magnitude (dB) at f of the RBJ analog low shelf with centre f0."""
+    A = 10 ** (gain_db / 40)
+    r = f / f0
+    num = A * complex(A - r * r, np.sqrt(A) / q * r)
+    den = complex(1 - A * r * r, np.sqrt(A) / q * r)
+    return 20 * np.log10(abs(num) / abs(den))
+
+
+def lf_boost_centre(f_sel, gain_db, q, drop_db=C.LF_BOOST_CORNER_DROP_DB):
+    """Shelf centre so that the gain AT f_sel is (gain - drop): selected frequency ~ near max."""
+    target = gain_db - min(drop_db, 0.35 * gain_db)
+    lo, hi = np.log(f_sel), np.log(f_sel * 60)
+    for _ in range(100):
+        mid = 0.5 * (lo + hi)
+        if lowshelf_db_at(f_sel, np.exp(mid), gain_db, q) < target:
+            lo = mid
+        else:
+            hi = mid
+    return float(np.exp(0.5 * (lo + hi)))
 
 
 def low_cut1(fc, depth_db):
@@ -72,12 +94,14 @@ def hf_q(f0, bw_pos):
 
 def analog_sections(p):
     secs = []
-    # Low boost
+    # Low boost (selected frequency sits near the maximum of the curve)
     gb = C.LF_BOOST_MAX_DB * taper(p.lf_boost, p.lf_boost_taper)
     if gb > 1e-3:
-        secs.append(low_shelf2(p.lf_freq, gb, p.lf_boost_q) + (p.lf_freq,))
-    # Low cut (two staggered 1st-order shelves = wide, shallow slope)
+        fm = lf_boost_centre(p.lf_freq, gb, p.lf_boost_q)
+        secs.append(low_shelf2(fm, gb, p.lf_boost_q) + (fm,))
+    # Low cut (two staggered 1st-order shelves = wide, shallow slope); boost reduces its depth
     gc = C.LF_CUT_MAX_DB * taper(p.lf_cut, p.lf_cut_taper)
+    gc *= 1 - p.lf_cut_interaction * gb / C.LF_BOOST_MAX_DB
     if gc > 1e-3:
         secs.append(low_cut1(p.lf_cut_k1 * p.lf_freq, p.lf_cut_split * gc) + (p.lf_cut_k1 * p.lf_freq,))
         secs.append(low_cut1(p.lf_cut_k2 * p.lf_freq, (1 - p.lf_cut_split) * gc) + (p.lf_cut_k2 * p.lf_freq,))

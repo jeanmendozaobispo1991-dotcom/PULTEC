@@ -25,14 +25,19 @@ def test_mna_series_resonator_peaks_at_f0():
     assert abs(f[np.argmax(h)] / 10000 - 1) < 0.02
 
 
-def test_lf_boost_and_cut_not_mirror_images():
+def test_lf_boost_is_near_maximum_at_selected_frequency():
     for fs in C.LF_FREQS_HZ:
-        pb = eq_response_db(Params(lf_freq=fs, lf_boost=10), F)
-        pc = eq_response_db(Params(lf_freq=fs, lf_cut=10), F)
-        # cut corner above boost corner (SOS: ~half octave) -> cut affects higher f
-        fb = F[np.argmin(np.abs(pb - pb[0] / 2))]
-        fc = F[np.argmin(np.abs(pc - pc[0] / 2))]
-        assert fc > fb * 1.2, (fs, fb, fc)
+        r = eq_response_db(Params(lf_freq=fs, lf_boost=10), F)
+        at_sel = float(np.interp(np.log(fs), np.log(F), r))
+        assert 15.0 < at_sel < 18.0, (fs, at_sel)          # selected freq ~ near max (boosted range)
+        assert r.max() < C.LF_BOOST_MAX_DB + 1.0, r.max()
+        assert r[0] > 17.0, r[0]                           # plateau below the selector
+
+
+def test_lf_cut_alone_reaches_published_depth():
+    for fs in C.LF_FREQS_HZ:
+        r = eq_response_db(Params(lf_freq=fs, lf_cut=10), F)
+        assert -20.5 < r[0] < -13.0, (fs, r[0])            # 17.5-20 dB in the sources
 
 
 def test_pultec_trick_gives_boost_with_midrange_dip():
@@ -41,14 +46,20 @@ def test_pultec_trick_gives_boost_with_midrange_dip():
         assert 2.0 < r[0] < 4.0, (fs, r[0])               # ~ +3 dB shelf (SOS)
         i = np.argmin(r)
         assert -2.6 < r[i] < -1.4, (fs, r[i])              # ~ -2 dB dip (SOS)
-        assert 2.5 * fs < F[i] < 10 * fs, (fs, F[i])       # dip a few x selector
+        assert 3 * fs < F[i] < 10 * fs, (fs, F[i])         # dip a few x selector
+        mx = eq_response_db(Params(lf_freq=fs, lf_boost=10, lf_cut=10), F)
+        assert mx[0] > 6.0 and mx.min() < -2.0, (fs, mx[0], mx.min())   # trick: still boosts, with a dip
 
 
-def test_hf_boost_bandwidth_spread_is_9db():
+def test_hf_boost_bandwidth_spread_and_width():
     f0 = 5000
-    sharp = eq_response_db(Params(hf_freq=f0, hf_boost=10, hf_bw=0), F).max()
-    broad = eq_response_db(Params(hf_freq=f0, hf_boost=10, hf_bw=10), F).max()
-    assert abs(sharp - 20) < 0.3 and abs((sharp - broad) - 9) < 0.3, (sharp, broad)
+    def stats(bw):
+        r = eq_response_db(Params(hf_freq=f0, hf_boost=10, hf_bw=bw), F)
+        a = F[r > r.max() - 3]
+        return r.max(), np.log2(a.max() / a.min())
+    (sharp, w_sharp), (broad, w_broad) = stats(0), stats(10)
+    assert abs(sharp - 20) < 0.3 and abs((sharp - broad) - 5) < 0.3, (sharp, broad)
+    assert w_sharp > 0.35 and w_broad > 1.8, (w_sharp, w_broad)   # audible, not needle-thin
 
 
 def test_hf_bandwidth_narrows_at_higher_frequency():

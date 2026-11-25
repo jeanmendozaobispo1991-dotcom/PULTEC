@@ -7,13 +7,14 @@ Estado: **[fuente]** publicado · **[derivado]** deducido de fuentes · **[supue
 | Frecuencias graves | 20/30/60/100 Hz | fuente | todas |
 | Realce de graves máx. | 16 dB | fuente (discutido) | Manley, paper SMC 2024; MusicTech dice 13,5 |
 | Atenuación de graves máx. | 20 dB | fuente (discutido) | Manley, paper; MusicTech 17,5; Waves 18 |
-| Esquina de atenuación de graves | ~½ octava sobre el realce (+ shelf ancho) | derivado | SOS 2019 (Audio Precision) |
+| Realce de graves en la frecuencia elegida | cerca del máximo (máx. -3 dB) | fuente | Manley; SOS 2019 |
+| Interacción realce/atenuación de graves | el realce reduce 60 % la atenuación | supuesto | necesaria para que 10/10 dé grave neto positivo |
 | Graves 2,5/2,5 | +3 dB (shelf), −2 dB (dip) | fuente | SOS 2019. Posición del dip: ajuste provisional (ver LF_MODEL.md) |
 | Frecuencias realce agudos | 3/4/5/8/10/12/16 kHz | fuente | todas |
-| Realce de agudos máx. | 20 dB (estrecho), 11 dB (ancho) | fuente | Manley/Waves 20 dB; SOS: 9 dB de diferencia |
+| Realce de agudos máx. | 20 dB (estrecho), 13 dB (ancho) | fuente (discutido) | Manley/Waves 20 dB; diferencia estrecho/ancho: SOS 9 dB, Manley 6,5 → 7 |
 | Tomas de bobina (L/C) | 29,9–87,9 mH / 3,3–18 nF | derivado | VintageWindings (valores revisados, no los del Pultec original); f0 = 1/(2π√LC) coincide con 4–16 kHz |
 | Q según frecuencia | ∝ √(L/C)/R | derivado | regresión sobre las tomas |
-| Rango de ancho de banda (Q) | 2,5 (estrecho) – 0,6 (ancho) | supuesto | a calibrar |
+| Rango de ancho de banda (Q) | 1,0 (estrecho, ~0,45 oct) – 0,3 (ancho, ~2 oct) | supuesto | a calibrar; v0.1 era demasiado estrecho |
 | Atenuación de agudos | 5/10/20 kHz, −21 dB máx., −12 dB en la f. elegida | fuente | Manley (paper 20 dB; MusicTech 16 dB) |
 | Pérdida de inserción | ~16 dB (recuperada por el amplificador) | fuente | paper SMC 2024, AudioTechnology, GearNews (otras citan ~20 dB) |
 | Impedancia de la red | 600 Ω | fuente | SOS 2019 |

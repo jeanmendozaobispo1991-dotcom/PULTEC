@@ -10,13 +10,14 @@ namespace pultec {
 constexpr double kPi = 3.14159265358979323846;
 
 // ---- spec constants (source tags in python/pultec/constants.py) -------------
-constexpr double kLfBoostMaxDb = 16.0;
+constexpr double kLfBoostMaxDb = 18.0;
 constexpr double kLfCutMaxDb = 20.0;
 constexpr double kHfBoostMaxDb = 20.0;
-constexpr double kHfBwSpreadDb = 9.0;
+constexpr double kHfBwSpreadDb = 5.0;
 constexpr double kHfCutMaxDb = 21.0;
 constexpr double kHfCutAtSelFrac = 12.0 / 21.0;
-constexpr double kQSharp = 2.5, kQBroad = 0.6;
+constexpr double kQSharp = 1.0, kQBroad = 0.3;
+constexpr double kLfBoostCornerDropDb = 1.5;   // gain at the selected freq = plateau - drop
 constexpr double kTubeBias = 0.3;
 constexpr double kXfmrCornerHz = 120.0;
 constexpr double kXfmrThreshold = 1.0;
@@ -28,8 +29,9 @@ struct Params {
     double hfFreq = 10000, hfBoost = 0, hfBw = 5;
     double hfCutFreq = 10000, hfCut = 0;
     // provisional LF behavioural fit (docs/LF_MODEL.md)
-    double lfBoostQ = 0.563, lfBoostTaper = 0.346, lfCutTaper = 0.757;
-    double lfCutSplit = 0.638, lfCutK1 = 0.673, lfCutK2 = 11.76;
+    double lfBoostQ = 0.6816, lfBoostTaper = 0.585, lfCutTaper = 0.7;
+    double lfCutSplit = 0.5772, lfCutK1 = 0.8331, lfCutK2 = 42.12;
+    double lfCutInteraction = 0.6;   // boost shrinks the effective cut depth
 };
 
 // Analog section, ascending powers of s: N(s)=n0+n1 s+n2 s^2, D(s)=d0+d1 s+d2 s^2
@@ -56,6 +58,24 @@ inline Section lowShelf2(double f0, double gDb, double q) {
     s.d[0] = 1;      s.d[1] = sA / (q * w0);      s.d[2] = A / (w0 * w0);
     s.fp = f0; s.active = true;
     return s;
+}
+
+inline double lowShelfDbAt(double f, double f0, double gDb, double q) {
+    double A = std::pow(10.0, gDb / 40), r = f / f0, sA = std::sqrt(A);
+    double nr = A - r * r, ni = sA / q * r, dr = 1 - A * r * r;
+    double num = A * std::sqrt(nr * nr + ni * ni), den = std::sqrt(dr * dr + ni * ni);
+    return 20 * std::log10(num / den);
+}
+
+// Shelf centre such that the gain AT fSel equals plateau - drop (selected freq ~ near max)
+inline double lfBoostCentre(double fSel, double gDb, double q, double dropDb = kLfBoostCornerDropDb) {
+    double target = gDb - std::fmin(dropDb, 0.35 * gDb);
+    double lo = std::log(fSel), hi = std::log(fSel * 60);
+    for (int i = 0; i < 100; ++i) {
+        double mid = 0.5 * (lo + hi);
+        (lowShelfDbAt(fSel, std::exp(mid), gDb, q) < target ? lo : hi) = mid;
+    }
+    return std::exp(0.5 * (lo + hi));
 }
 
 inline Section lowCut1(double fc, double depthDb) {
@@ -122,8 +142,9 @@ using SectionSet = std::array<Section, 5>;
 inline SectionSet design(const Params& p) {
     SectionSet s{};
     double gb = kLfBoostMaxDb * taper(p.lfBoost, p.lfBoostTaper);
-    if (gb > 1e-3) s[0] = lowShelf2(p.lfFreq, gb, p.lfBoostQ);
+    if (gb > 1e-3) s[0] = lowShelf2(lfBoostCentre(p.lfFreq, gb, p.lfBoostQ), gb, p.lfBoostQ);
     double gc = kLfCutMaxDb * taper(p.lfCut, p.lfCutTaper);
+    gc *= 1 - p.lfCutInteraction * gb / kLfBoostMaxDb;
     if (gc > 1e-3) {
         s[1] = lowCut1(p.lfCutK1 * p.lfFreq, p.lfCutSplit * gc);
         s[2] = lowCut1(p.lfCutK2 * p.lfFreq, (1 - p.lfCutSplit) * gc);

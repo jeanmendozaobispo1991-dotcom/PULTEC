@@ -9,10 +9,10 @@ LF_FREQS_HZ = (20, 30, 60, 100)
 HF_BOOST_FREQS_HZ = (3000, 4000, 5000, 8000, 10000, 12000, 16000)
 HF_CUT_FREQS_HZ = (5000, 10000, 20000)
 
-LF_BOOST_MAX_DB = 16.0     # Manley + SMC2024 paper (MusicTech: 13.5)          [source, disputed]
+LF_BOOST_MAX_DB = 18.0     # sources say 13.5-16; raised for more weight (user listening)  [assumed]
 LF_CUT_MAX_DB = 20.0       # Manley + paper (MusicTech 17.5, Waves 18)         [source, disputed]
 HF_BOOST_MAX_DB = 20.0     # Manley panel + Waves (MusicTech: 18)              [source]
-HF_BW_SPREAD_DB = 9.0      # SOS 2019 Audio Precision: narrow vs broad @ max   [source]
+HF_BW_SPREAD_DB = 5.0      # narrow vs broad @ max: SOS 9, Manley 6.5; 5 chosen for more air [assumed]
 HF_CUT_MAX_DB = 21.0       # Manley (paper 20, MusicTech 16)                   [source, disputed]
 HF_CUT_AT_SEL_FRAC = 12.0 / 21.0   # Manley: -12 dB at selected f, -21 max     [source]
 
@@ -34,3 +34,9 @@ HF_BOOST_LC = {
     5000:  (67.5e-3, 15e-9),
     4000:  (87.9e-3, 18e-9),
 }
+
+# Low boost corner = point where gain has dropped this much from the plateau, so the
+# selected frequency sits near the maximum (Manley: 'nearly the maximum of the curve')
+LF_BOOST_CORNER_DROP_DB = 1.5                                                    # [derived]
+# Boost reduces the effective depth of the low atten (shared passive network)
+LF_CUT_INTERACTION = 0.6                                                         # [assumed]
